@@ -41,6 +41,144 @@
       </p>
     </footer>
 
+    <!-- Auth modal (login & register) -->
+    <div class="auth-overlay" id="auth-overlay" aria-hidden="true">
+      <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <button class="auth-modal__close" id="auth-close" aria-label="Close">&times;</button>
+
+        <div class="auth-modal__tabs" role="tablist">
+          <button
+            class="auth-modal__tab auth-modal__tab--active"
+            id="tab-login"
+            data-mode="login"
+            type="button"
+            role="tab"
+            aria-selected="true"
+          >
+            Login
+          </button>
+          <button
+            class="auth-modal__tab"
+            id="tab-register"
+            data-mode="register"
+            type="button"
+            role="tab"
+            aria-selected="false"
+          >
+            Register
+          </button>
+        </div>
+
+        <h2 class="auth-modal__title" id="auth-title">Welcome back</h2>
+        <p class="auth-modal__subtitle">Sign in to continue watching.</p>
+        <p class="auth-modal__message" id="auth-message" aria-live="polite"></p>
+
+        <!-- Login form -->
+        <form class="auth-form auth-form--login" id="login-form" autocomplete="on">
+          <div class="input-field">
+            <input
+              type="text"
+              id="login-username"
+              name="username"
+              required
+            />
+            <label for="login-username">User name</label>
+          </div>
+
+          <div class="input-field">
+            <input
+              type="password"
+              id="login-password"
+              name="password"
+              required
+              minlength="6"
+            />
+            <label for="login-password">Password</label>
+          </div>
+
+          <div class="forget">
+            <label for="login-remember">
+              <input type="checkbox" id="login-remember" />
+              <p>Remember me</p>
+            </label>
+            <button type="button" class="auth-link auth-link--muted">Forgot password?</button>
+          </div>
+
+          <button type="submit" class="auth-submit">Log In</button>
+
+          <p class="auth-switch">
+            Don't have an account?
+            <button type="button" class="auth-link" data-switch="register">
+              Register
+            </button>
+          </p>
+        </form>
+
+        <!-- Register form -->
+        <form class="auth-form auth-form--register" id="register-form" autocomplete="on" hidden>
+          <div class="input-field">
+            <input
+              type="text"
+              id="reg-user-id"
+              name="userId"
+              required
+            />
+            <label for="reg-user-id">User ID</label>
+          </div>
+
+          <div class="input-field">
+            <input
+              type="text"
+              id="reg-username"
+              name="username"
+              required
+            />
+            <label for="reg-username">User name</label>
+          </div>
+
+          <div class="input-field">
+            <input
+              type="email"
+              id="reg-email"
+              name="email"
+              required
+            />
+            <label for="reg-email">Email</label>
+          </div>
+
+          <div class="input-field">
+            <input
+              type="tel"
+              id="reg-phone"
+              name="phone"
+              required
+            />
+            <label for="reg-phone">Phone number</label>
+          </div>
+
+          <div class="input-field">
+            <input
+              type="password"
+              id="reg-password"
+              name="password"
+              required
+              minlength="6"
+            />
+            <label for="reg-password">Password</label>
+          </div>
+
+          <button type="submit" class="auth-submit">Create account</button>
+
+          <p class="auth-switch">
+            Already have an account?
+            <button type="button" class="auth-link" data-switch="login">
+              Login
+            </button>
+          </p>
+        </form>
+      </div>
+    </div>
+
     <script src="./app.js"></script>
   </body>
 </html>

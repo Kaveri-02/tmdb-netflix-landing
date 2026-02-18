@@ -10,6 +10,18 @@ const heroSection = document.getElementById("hero");
 const heroTitle = document.getElementById("hero-title");
 const heroSubtitle = document.getElementById("hero-subtitle");
 
+// Auth modal elements
+const authOverlay = document.getElementById("auth-overlay");
+const authCloseBtn = document.getElementById("auth-close");
+const authTabs = document.querySelectorAll(".auth-modal__tab");
+const loginForm = document.getElementById("login-form");
+const registerForm = document.getElementById("register-form");
+const authMessage = document.getElementById("auth-message");
+const authTitle = document.getElementById("auth-title");
+const authSubtitle = document.querySelector(".auth-modal__subtitle");
+const navSigninBtn = document.querySelector(".nav__button--signin");
+const heroPrimaryBtn = document.querySelector(".btn--primary");
+
 if (!TMDB_API_KEY || TMDB_API_KEY === "REPLACE_WITH_YOUR_TMDB_API_KEY") {
   const warning = document.createElement("p");
   warning.className = "rows__status";
@@ -96,8 +108,183 @@ function setHeroFromMovie(movie) {
   heroSubtitle.textContent = overview || "Watch anywhere. Cancel anytime.";
 }
 
+function showAuthMessage(text, type) {
+  authMessage.textContent = text || "";
+  authMessage.classList.remove("auth-modal__message--error", "auth-modal__message--success");
+  if (type === "error") {
+    authMessage.classList.add("auth-modal__message--error");
+  } else if (type === "success") {
+    authMessage.classList.add("auth-modal__message--success");
+  }
+}
+
+function setAuthMode(mode) {
+  const isLogin = mode === "login";
+
+  authTabs.forEach((tab) => {
+    const tabMode = tab.dataset.mode;
+    tab.classList.toggle("auth-modal__tab--active", tabMode === mode);
+    tab.setAttribute("aria-selected", tabMode === mode ? "true" : "false");
+  });
+
+  loginForm.hidden = !isLogin;
+  registerForm.hidden = isLogin;
+
+  if (isLogin) {
+    authTitle.textContent = "Welcome back";
+    authSubtitle.textContent = "Sign in to continue watching.";
+  } else {
+    authTitle.textContent = "Create your account";
+    authSubtitle.textContent = "Register to start building your watchlist.";
+  }
+
+  showAuthMessage("", null);
+}
+
+function openAuth(mode = "login") {
+  setAuthMode(mode);
+  authOverlay.classList.add("auth-overlay--visible");
+  authOverlay.setAttribute("aria-hidden", "false");
+
+  const firstInput = (mode === "login"
+    ? loginForm.querySelector("input")
+    : registerForm.querySelector("input"));
+  if (firstInput) {
+    setTimeout(() => firstInput.focus(), 50);
+  }
+}
+
+function closeAuth() {
+  authOverlay.classList.remove("auth-overlay--visible");
+  authOverlay.setAttribute("aria-hidden", "true");
+  showAuthMessage("", null);
+  loginForm.reset();
+  registerForm.reset();
+}
+
+function handleRegisterSubmit(event) {
+  event.preventDefault();
+
+  const formData = new FormData(registerForm);
+  const userId = String(formData.get("userId") || "").trim();
+  const username = String(formData.get("username") || "").trim();
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  const phone = String(formData.get("phone") || "").trim();
+  const password = String(formData.get("password") || "");
+
+  if (!userId || !username || !email || !phone || !password) {
+    showAuthMessage("Please fill in all fields.", "error");
+    return;
+  }
+
+  fetch("/api/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userId, username, email, phone, password }),
+  })
+    .then(async (res) => {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Registration failed.");
+      }
+      showAuthMessage(data.message || "Account created. You can now log in.", "success");
+      registerForm.reset();
+      setTimeout(() => setAuthMode("login"), 900);
+    })
+    .catch((err) => {
+      showAuthMessage(err.message || "Unable to register right now.", "error");
+    });
+}
+
+function handleLoginSubmit(event) {
+  event.preventDefault();
+
+  const formData = new FormData(loginForm);
+  const username = String(formData.get("username") || "").trim();
+  const password = String(formData.get("password") || "");
+
+  if (!username || !password) {
+    showAuthMessage("Enter your username and password.", "error");
+    return;
+  }
+
+  fetch("/api/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  })
+    .then(async (res) => {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Login failed.");
+      }
+      showAuthMessage("Login successful. Redirecting…", "success");
+      setTimeout(() => {
+        window.location.href = "https://tmdb-netflix-landing.vercel.app/";
+      }, 900);
+    })
+    .catch((err) => {
+      showAuthMessage(err.message || "Unable to log in right now.", "error");
+    });
+}
+
+function setupAuthUI() {
+  if (!authOverlay) return;
+
+  // Openers
+  if (navSigninBtn) {
+    navSigninBtn.addEventListener("click", () => openAuth("login"));
+  }
+  if (heroPrimaryBtn) {
+    heroPrimaryBtn.addEventListener("click", () => openAuth("register"));
+  }
+
+  // Close button and overlay click
+  if (authCloseBtn) {
+    authCloseBtn.addEventListener("click", closeAuth);
+  }
+  authOverlay.addEventListener("click", (event) => {
+    if (event.target === authOverlay) {
+      closeAuth();
+    }
+  });
+
+  // Tabs
+  authTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const mode = tab.dataset.mode === "register" ? "register" : "login";
+      setAuthMode(mode);
+    });
+  });
+
+  // Inline small "switch" links
+  document.querySelectorAll(".auth-switch [data-switch]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.switch === "register" ? "register" : "login";
+      setAuthMode(mode);
+    });
+  });
+
+  // Submit handlers
+  registerForm.addEventListener("submit", handleRegisterSubmit);
+  loginForm.addEventListener("submit", handleLoginSubmit);
+
+  // Escape key
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && authOverlay.classList.contains("auth-overlay--visible")) {
+      closeAuth();
+    }
+  });
+}
+
 async function init() {
   if (!TMDB_API_KEY || TMDB_API_KEY === "REPLACE_WITH_YOUR_TMDB_API_KEY") {
+    // Even without TMDB configured, still enable auth UI.
+    setupAuthUI();
     return;
   }
 
@@ -124,12 +311,17 @@ async function init() {
     );
 
     await Promise.all(promises);
+
+    // Set up auth after content loads
+    setupAuthUI();
   } catch (error) {
     console.error(error);
     const status = document.createElement("p");
     status.className = "rows__status";
     status.textContent = "Unable to load movies right now. Please try again later.";
     rowsContainer.appendChild(status);
+
+    setupAuthUI();
   }
 }
 
