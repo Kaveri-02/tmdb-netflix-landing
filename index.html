@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Netflix · TMDB Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="nav">
+      <div class="nav__left">
+        <span class="nav__logo">NETFLIX</span>
+      </div>
+      <div class="nav__right">
+        <button class="nav__button nav__button--signin">Sign In</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="hero">
+        <div class="hero__overlay"></div>
+        <div class="hero__content">
+          <h1 class="hero__title" id="hero-title">Unlimited movies, TV shows and more</h1>
+          <p class="hero__subtitle" id="hero-subtitle">Watch anywhere. Cancel anytime.</p>
+          <div class="hero__actions">
+            <button class="btn btn--primary">Get Started</button>
+            <button class="btn btn--secondary">Learn More</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="rows" id="rows">
+        <!-- Movie rows injected by app.js -->
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p class="footer__text">
+        Data provided by
+        <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer">TMDB</a>.
+      </p>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+
